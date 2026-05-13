@@ -1,3 +1,10 @@
+/*
+---------------------------------------------------
+Motion Detection Security System Using PIR Sensor
+MCU : ATmega328P / ATmega32P
+Clock : 16 MHz
+---------------------------------------------------
+*/
 
 #define F_CPU 16000000UL
 
@@ -21,6 +28,9 @@ void status_led_blink(void);
 void alarm_on(void);
 void alarm_off(void);
 
+void tone(uint16_t frequency);
+void noTone(void);
+
 /* -------- Main Program -------- */
 
 int main(void)
@@ -32,11 +42,14 @@ int main(void)
         // System running indication
         status_led_blink();
 
-        // Check PIR sensor state
+        // Check PIR sensor
         if(PIND & (1 << PIR_SENSOR))
         {
             // Motion detected
             alarm_on();
+
+            // Generate buzzer tone (1000 Hz)
+            tone(1000);
 
             // Alarm duration = 5 seconds
             for(uint8_t i = 0; i < 5; i++)
@@ -44,7 +57,10 @@ int main(void)
                 _delay_ms(1000);
             }
 
-            // Turn OFF alarm
+            // Stop buzzer
+            noTone();
+
+            // Turn OFF alarm LED
             alarm_off();
         }
     }
@@ -59,10 +75,10 @@ void system_init(void)
     DDRB |= (1 << ALERT_LED);
     DDRB |= (1 << BUZZER);
 
-    // Set PIR sensor pin as INPUT
+    // Set PIR sensor as INPUT
     DDRD &= ~(1 << PIR_SENSOR);
 
-    // Optional internal pull-up resistor
+    // Enable internal pull-up resistor
     PORTD |= (1 << PIR_SENSOR);
 
     // Initially OFF
@@ -84,8 +100,6 @@ void status_led_blink(void)
 void alarm_on(void)
 {
     PORTB |= (1 << ALERT_LED);
-    PORTB |= (1 << BUZZER);
-    
 }
 
 /* -------- Alarm OFF -------- */
@@ -93,5 +107,35 @@ void alarm_on(void)
 void alarm_off(void)
 {
     PORTB &= ~(1 << ALERT_LED);
+}
+
+/* -------- tone() Function -------- */
+/*
+   Simple square wave generator
+   Frequency in Hz
+*/
+
+void tone(uint16_t frequency)
+{
+    uint16_t delay_time;
+
+    delay_time = 1000000UL / (frequency * 2);
+
+    // Generate tone for short duration
+    for(uint16_t i = 0; i < 1000; i++)
+    {
+        PORTB ^= (1 << BUZZER);
+
+        for(uint16_t j = 0; j < delay_time; j++)
+        {
+            _delay_us(1);
+        }
+    }
+}
+
+/* -------- noTone() Function -------- */
+
+void noTone(void)
+{
     PORTB &= ~(1 << BUZZER);
 }
