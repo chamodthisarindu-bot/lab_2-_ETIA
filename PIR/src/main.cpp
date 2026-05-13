@@ -1,10 +1,4 @@
-/*
----------------------------------------------------
-Motion Detection Security System Using PIR Sensor
-MCU : ATmega328P / ATmega32P
-Clock : 16 MHz
----------------------------------------------------
-*/
+
 
 #define F_CPU 16000000UL
 
